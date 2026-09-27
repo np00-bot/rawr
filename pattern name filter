@@ -289,7 +289,7 @@ local revolveMenu, revolveScroll = createMenu("Revolve Type")
 local rotateMenu, rotateScroll = createMenu("Rotate Type")
 
 -- --- POPULATING UI MENUS ---
-local excludedUsers = { Nothing_sam00 = true, Kausarali2 = true, mob_one00 = true, cutie143198 = true }
+local excludedUsers = { Nothing_sam00 = true, Kausarali2 = true, mob_one00 = true, cutie143198 = true, Yashhhq1 = true }
 
 local function refreshPlayers()
     for _, child in ipairs(playerScroll:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
