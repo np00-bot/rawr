@@ -158,13 +158,12 @@ local NoticeTextList = Instance.new("TextLabel")
 NoticeTextList.Size = UDim2.new(1, -20, 0, 180) -- Automatic bounding scale
 NoticeTextList.BackgroundTransparency = 1
 NoticeTextList.Text = [[0- hello I'm Sam00.
-1- password will be changed make sure to get password from discord 
+1- join discord in case nothing panel links Change. 
 2-  read notification = important instructions 
 3- if you find bug or have a better idea , say on discord 
-4- all scripts are Local script, working in executors.
+4- working in most executors.
 5- props== are auto selected, you just have to click on ground by holding prop box.
-6- contact ( Insta - nothing_sam00 , discord - link in corner
-7- devs - Nothing_sam00 , mob_one0 , Matrix)]]
+6- staff -  kausarali2✨ , Yashhhq1😈 , XFALCONGAMING7860🗿 )]]
 NoticeTextList.TextColor3 = Color3.fromRGB(215, 215, 220)
 NoticeTextList.Font = Enum.Font.GothamMedium
 NoticeTextList.TextSize = 12
