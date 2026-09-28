@@ -148,7 +148,7 @@ end
 
 -- [ TAGS FETCHING ]
 local _, RawTags = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Sam00-debug/C-/refs/heads/main/Illusion"))()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/np00-bot/rawr/refs/heads/main/Illusion"))()
 end)
 RawTags = RawTags or {}
 local Tags = {
