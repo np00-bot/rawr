@@ -633,16 +633,16 @@ local function displayMessage(userName, msg, privateUserTarget, isPrivateSender,
     local rtsTag, legacyTag = "", ""
     if Tags.Owner[lowerUser] then
         rtsTag = "<font color='#FFFF00'><stroke color='#FFA500' joins='miter' thickness='2'>[👑 Owner]</stroke></font> "
-        legacyTag = "[👑 Owner] "
+        legacyTag = "[👑 OWNER] "
     elseif Tags.Admin[lowerUser] then
         rtsTag = "<font color='#FF0000'>[Admin]</font> "
-        legacyTag = "[Admin] "
+        legacyTag = "[ADMIN] "
     elseif Tags.Staff[lowerUser] then
         rtsTag = "<font color='#00AAFF'>[Staff]</font> "
-        legacyTag = "[Staff] "
+        legacyTag = "[STAFF] "
     elseif Tags.Mod[lowerUser] then
         rtsTag = "<font color='#0000FF'>[Mod]</font> "
-        legacyTag = "[Mod] "
+        legacyTag = "[MOD] "
     elseif Tags.VIP[lowerUser] then
         rtsTag = "<font color='#FFFF00'>[VIP]</font> "
         legacyTag = "[VIP] "
