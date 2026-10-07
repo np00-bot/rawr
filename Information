@@ -163,7 +163,7 @@ NoticeTextList.Text = [[0- hello I'm Sam00.
 3- if you find bug or have a better idea , say on discord 
 4- working in most executors.
 5- props== are auto selected, you just have to click on ground by holding prop box.
-6- staff -  kausarali2✨ , Yashhhq1😈 , XFALCONGAMING7860🗿 )]]
+6- staff -  kausarali2✨ , XFALCONGAMING7860🗿 )]]
 NoticeTextList.TextColor3 = Color3.fromRGB(215, 215, 220)
 NoticeTextList.Font = Enum.Font.GothamMedium
 NoticeTextList.TextSize = 12
