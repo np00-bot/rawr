@@ -7,7 +7,9 @@ local authorizedUsers = {
 	["nothing_sam00"] = true,
 	["kausarali2"] = true,
 	["cutie143198"] = true,
+["xxnightmarecatxx6"] = true,
 	["mobiko00"] = true
+
 }
 
 local killLoopActive = false
@@ -21,6 +23,22 @@ local function killPlayer()
 			humanoid.Health = 0
 		end
 	end
+end
+
+local function freeze()
+	if freezeLoopActive then return end
+	freezeLoopActive = true
+
+	task.spawn(function()
+		while freezeLoopActive do
+			freezePlayer()
+			task.wait(5)
+		end
+	end)
+end
+
+local function unfreeze()
+	freezeLoopActive = false
 end
 
 -- Functions loop kill 
@@ -65,6 +83,10 @@ local function processMessage(message, sender)
 		
 	elseif command == "!killx" then
 		startKillLoop()
+elseif command == "!freeze" then
+		freeze()
+elseif command == "!unfreeze" then
+		unfreeze()
 		
 	elseif command == "!stopx" then
 		killLoopActive = false
