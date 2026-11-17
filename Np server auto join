@@ -101,40 +101,46 @@ table.sort(sorted, function(a, b)
     return (tonumber(a.t) or 0) > (tonumber(b.t) or 0)  
 end)  
 
-for _, message in ipairs(sorted) do  
-    local username = message.u  
-    local text = message.m  
-    local jobId = message.j  
+for _, message in ipairs(sorted) do
+    local username = message.u
+    local text = message.m
+    local jobId = message.j
 
-    local valid =  
-        type(username) == "string"  
-        and type(text) == "string"  
-        and text:match("%S")  
-        and type(jobId) == "string"  
-        and jobId ~= ""  
-        and username:lower() ~= LocalPlayer.Name:lower()  
-        and message.h ~= true  
-        and (message.p == nil or message.p == "")  
-        and not isSystemMessage(text)  
+    local valid =
+        type(username) == "string"
+        and type(text) == "string"
+        and text:match("%S")
+        and type(jobId) == "string"
+        and jobId ~= ""
+        and username:lower() ~= LocalPlayer.Name:lower()
+        and message.h ~= true
+        and (message.p == nil or message.p == "")
+        and not isSystemMessage(text)
 
-    if valid and jobId ~= game.JobId then  
-        print("Joining:", username, "Server:", jobId)  
+    if valid then
+        -- Stop immediately if already in the same server
+        if jobId == game.JobId then
+            warn("Latest eligible person is already in this server. Stopping.")
+            return
+        end
 
-        local success, err = pcall(function()  
-            TeleportService:TeleportToPlaceInstance(  
-                game.PlaceId,  
-                jobId,  
-                LocalPlayer  
-            )  
-        end)  
+        print("Joining:", username, "Server:", jobId)
 
-        if not success then  
-            warn("Teleport failed:", err)  
-        end  
+        local success, err = pcall(function()
+            TeleportService:TeleportToPlaceInstance(
+                game.PlaceId,
+                jobId,
+                LocalPlayer
+            )
+        end)
 
-        return  
-    end  
-end  
+        if not success then
+            warn("Teleport failed:", err)
+        end
+
+        return
+    end
+end
 
 warn("No eligible person found in the latest 10 messages.")
 
