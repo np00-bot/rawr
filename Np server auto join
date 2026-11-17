@@ -56,6 +56,35 @@ or message:match("^jdeny[01]+$")
 or message:match("^jtimeout[01]+$")
 end
 
+local function sendJoinedMessage()
+    local exactTime = DateTime.now().UnixTimestampMillis
+    local today = os.date("!%Y-%m-%d")
+
+    local payload = {
+        ["chat/" .. today .. "/" .. HttpService:GenerateGUID(false)] = {
+            u = LocalPlayer.Name,
+            d = LocalPlayer.DisplayName,
+            m = "Joined",
+            j = game.JobId,
+            p = "",
+            h = true,
+            t = exactTime
+        },
+        sync = exactTime
+    }
+
+    pcall(function()
+        request({
+            Url = FirebaseURL .. ".json",
+            Method = "PATCH",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = HttpService:JSONEncode(payload)
+        })
+    end)
+end
+
 local function joinLatestDifferentServer()
 local messages = fetchLatest10()
 if not messages then return end
