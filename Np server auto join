@@ -1,0 +1,115 @@
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+
+local LocalPlayer = Players.LocalPlayer
+
+-- Your Firebase database URLs
+local FIREBASE_DATABASES = {
+    "https://roblox-chat-112d0-default-rtdb.firebaseio.com/",
+    "https://roblox-chat-2-default-rtdb.firebaseio.com/"
+}
+
+local day = tonumber(os.date("%d")) or 1
+
+local FirebaseURL = FIREBASE_DATABASES[day <= 15 and 1 or 2]
+
+
+-- Same UTC date format as your chat script
+local today = os.date("!%Y-%m-%d")
+
+local function fetchLatest10()
+local url = FirebaseURL
+.. "/chat/" .. today
+.. ".json?orderBy=%22t%22&limitToLast=10"
+
+local success, response = pcall(function()  
+    return request({  
+        Url = url,  
+        Method = "GET"  
+    })  
+end)  
+
+if not success or not response or response.StatusCode ~= 200 then  
+    warn("Failed to fetch Firebase messages")  
+    return nil  
+end  
+
+local decodedSuccess, data = pcall(function()  
+    return HttpService:JSONDecode(response.Body)  
+end)  
+
+if not decodedSuccess or type(data) ~= "table" then  
+    return nil  
+end  
+
+return data
+
+end
+
+local function isSystemMessage(message)
+return message == "Joined"
+or message:match("^p[01]+$")
+or message:match("^j[01]+$")
+or message:match("^jr[01]+:")
+or message:match("^jdeny[01]+$")
+or message:match("^jtimeout[01]+$")
+end
+
+local function joinLatestDifferentServer()
+local messages = fetchLatest10()
+if not messages then return end
+
+local sorted = {}  
+
+for _, message in pairs(messages) do  
+    if type(message) == "table" then  
+        table.insert(sorted, message)  
+    end  
+end  
+
+table.sort(sorted, function(a, b)  
+    return (tonumber(a.t) or 0) > (tonumber(b.t) or 0)  
+end)  
+
+for _, message in ipairs(sorted) do  
+    local username = message.u  
+    local text = message.m  
+    local jobId = message.j  
+
+    local valid =  
+        type(username) == "string"  
+        and type(text) == "string"  
+        and text:match("%S")  
+        and type(jobId) == "string"  
+        and jobId ~= ""  
+        and username:lower() ~= LocalPlayer.Name:lower()  
+        and message.h ~= true  
+        and (message.p == nil or message.p == "")  
+        and not isSystemMessage(text)  
+
+    if valid and jobId ~= game.JobId then  
+        print("Joining:", username, "Server:", jobId)  
+
+        local success, err = pcall(function()  
+            TeleportService:TeleportToPlaceInstance(  
+                game.PlaceId,  
+                jobId,  
+                LocalPlayer  
+            )  
+        end)  
+
+        if not success then  
+            warn("Teleport failed:", err)  
+        end  
+
+        return  
+    end  
+end  
+
+warn("No eligible person found in the latest 10 messages.")
+
+end
+
+joinLatestDifferentServer()
+
