@@ -110,7 +110,7 @@ Players.PlayerAdded:Connect(onPlayerAdded)
 
 -- URL COMMANDS (PUBLIC)
 local urlCommands = {
-    ["!8355886969"] = "https://raw.githubusercontent.com/np00-bot/rawr/refs/heads/main/Np%20server%20auto%20join",
+    ["!wing1"] = "https://raw.githubusercontent.com/np00-bot/Np-server-Scripts-/refs/heads/main/Wing1",
     ["!script2"] = "YOUR_SECOND_RAW_URL",
     ["!script3"] = "YOUR_THIRD_RAW_URL"
 }
