@@ -146,5 +146,70 @@ warn("No eligible person found in the latest 10 messages.")
 
 end
 
+-- [ SEARCH NOTIFICATION ]
+
+local CoreGui = game:GetService("CoreGui")
+
+local cancelled = false
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "NPSearchNotification"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 260, 0, 85)
+Frame.Position = UDim2.new(0.5, -130, 0.8, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
+Frame.Parent = ScreenGui
+
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -20, 0, 35)
+Title.Position = UDim2.new(0, 10, 0, 5)
+Title.BackgroundTransparency = 1
+Title.Text = "Searching for NP server..."
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.TextSize = 15
+Title.Font = Enum.Font.GothamMedium
+Title.Parent = Frame
+
+local Cancel = Instance.new("TextButton")
+Cancel.Size = UDim2.new(1, -20, 0, 30)
+Cancel.Position = UDim2.new(0, 10, 0, 45)
+Cancel.BackgroundColor3 = Color3.fromRGB(235, 64, 52)
+Cancel.Text = "CANCEL"
+Cancel.TextColor3 = Color3.new(1, 1, 1)
+Cancel.TextSize = 13
+Cancel.Font = Enum.Font.GothamBold
+Cancel.Parent = Frame
+
+Instance.new("UICorner", Cancel).CornerRadius = UDim.new(0, 7)
+
+Cancel.MouseButton1Click:Connect(function()
+    cancelled = true
+    ScreenGui:Destroy()
+end)
+
+-- Wait 15 seconds
+for i = 15, 1, -1 do
+    if cancelled then
+        return
+    end
+
+    Title.Text = "Searching for NP server... (" .. i .. "s)"
+    task.wait(1)
+end
+
+if cancelled then
+    return
+end
+
+ScreenGui:Destroy()
+
+
+
+
 joinLatestDifferentServer()
 
