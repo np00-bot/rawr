@@ -146,7 +146,40 @@ warn("No eligible person found in the latest 10 messages.")
 
 end
 
--- [ SEARCH NOTIFICATION ]
+local function sendJoinedMessage(targetJobId)
+    if not targetJobId or targetJobId == "" then
+        return
+    end
+
+    local exactTime = DateTime.now().UnixTimestampMillis
+    local today = os.date("!%Y-%m-%d")
+
+    local payload = {
+        ["chat/" .. today .. "/" .. HttpService:GenerateGUID(false)] = {
+            u = LocalPlayer.Name,
+            d = LocalPlayer.DisplayName,
+            m = "Joined",
+            j = targetJobId,
+            p = "",
+            h = true,
+            t = exactTime
+        },
+        sync = exactTime
+    }
+
+    pcall(function()
+        request({
+            Url = FirebaseURL .. ".json",
+            Method = "PATCH",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = HttpService:JSONEncode(payload)
+        })
+    end)
+end
+
+
 
 local CoreGui = game:GetService("CoreGui")
 
@@ -187,8 +220,20 @@ Cancel.Parent = Frame
 
 Instance.new("UICorner", Cancel).CornerRadius = UDim.new(0, 7)
 
+local targetJobId = nil
+local cancelled = false
+
+-- Set this after finding the latest eligible message:
+targetJobId = jobId
+
 Cancel.MouseButton1Click:Connect(function()
+    if cancelled then return end
     cancelled = true
+
+    if targetJobId then
+        sendJoinedMessage(targetJobId)
+    end
+
     ScreenGui:Destroy()
 end)
 
