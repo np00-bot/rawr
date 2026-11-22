@@ -272,35 +272,6 @@ Instance.new("UICorner", ReopenBtn).CornerRadius = UDim.new(0, 25)
 MakeDraggable(ReopenBtn, ReopenBtn)
 --  KEY AUTHENTICATION SYSTEM
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-local hasFriend = false
-
-for _, player in ipairs(Players:GetPlayers()) do
-    if player ~= LocalPlayer then
-        local success, result = pcall(function()
-            return LocalPlayer:IsFriendsWithAsync(player.UserId)
-        end)
-
-        if success and result then
-            hasFriend = true
-            print("Friend found:", player.Name)
-            break
-        end
-    end
-end
-
-if not hasFriend then
-    print("No friends found. Executing auto join...")
-
-    loadstring(game:HttpGet(
-        "https://raw.githubusercontent.com/np00-bot/rawr/refs/heads/main/Np%20server%20auto%20join"
-    ))()
-else
-    print("Friend is already in this server. Skipping auto join.")
-end
-
 
 
 -- loadstring loads
