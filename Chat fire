@@ -10,6 +10,7 @@ local LocalPlayer = Players.LocalPlayer
 local req = request or http_request or (syn and syn.request)
 if not req then warn("Your executor does not support HTTP requests.") return end
 
+_G.NothingChatUsers = {}
 
 
 -- [ CONFIGURATION ]
@@ -416,7 +417,7 @@ local function getRecentMessageMeta()
     if not data or type(data) ~= "table" then
         return {}
     end
-
+_G.NothingChatUsers = users
     return data
 end
 
@@ -622,24 +623,3 @@ task.spawn(function()
     pollMessages()
 end)
 
--- Automated System Alerts
-task.spawn(function()
-    while task.wait(350) do displayMessage("System", "\n1) !e = emojis\n2) !p = private chat \n3) !i = invite users \n4) !cmds = all commands") end
-end)
-task.spawn(function()
-    while task.wait(200) do displayMessage("dc bot", "join DISCORD = 'VIP' title chat🌟") end
-end)
-
-local messages = {  
-    {"miku", " type !invite"},
-    {"cutie", "type !private"},
-    {"Sakura", " type ;fly , ;invisible , ;speed 200 , ;tp (player)"},
-    {"daddy", "what will you do if script delets , better JOIN DISCORD 👺❤️"}
-}
-task.spawn(function()
-    local idx = 1
-    while task.wait(120) do
-        displayMessage(messages[idx][1], messages[idx][2])
-        idx = (idx % #messages) + 1
-    end
-end)
