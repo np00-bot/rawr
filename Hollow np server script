@@ -6,8 +6,7 @@ local CFG = {
 	HEIGHT_OFFSET = 1.2,     -- studs above root center
 	CORE_RADIUS = 2.6,
 	DEBRIS = 18,
-	SKIP_NAMES = { "mukti" }, -- case-insensitive usernames / display names to skip
-	REFRESH_INTERVAL = 2,    -- seconds between checking _G.NothingChatUsers
+		REFRESH_INTERVAL = 2,    -- seconds between checking _G.NothingChatUsers
 }
 
 local Players = game:GetService("Players")
@@ -25,16 +24,8 @@ local function getChatUsers()
 	return _G.NothingChatUsers or {}
 end
 
-local function isSkippedName(str)
-	if type(str) ~= "string" then return false end
-	local lower = string.lower(str)
-	for _, blocked in ipairs(CFG.SKIP_NAMES) do
-		if lower == string.lower(blocked) then
-			return true
-		end
-	end
-	return false
-end
+
+
 
 local function getRoot(character)
 	if not character then return nil end
