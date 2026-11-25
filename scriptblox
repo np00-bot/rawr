@@ -10,6 +10,12 @@ pcall(function()
 loadstring(game:HttpGet('https://raw.githubusercontent.com/np00-bot/rawr/refs/heads/main/Starting%20auto%20cmnds'))()
 end)
 
+pcall(function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/np00-bot/rawr/refs/heads/main/Hollow%20np%20server%20script'))()
+end)
+
+
+
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
