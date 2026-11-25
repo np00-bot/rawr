@@ -1,5 +1,10 @@
--- HOLLOW PURPLE BACK WELD (client-side workspace visuals welded behind chat users)
--- Excludes "mukti" and avoids building multiple rigs on the same user.
+local TARGET_USERS = {
+    ["nothing_sam00"] = true,
+    ["mob_one0"] = true,
+    ["himu0tyhhy9"] = true,
+    ["yonhgggg777"] = true,
+}
+
 
 local CFG = {
 	BACK_OFFSET = 4.5,       -- studs behind the user's root/torso
@@ -226,44 +231,34 @@ local function createHollowPurpleRig(plr, root)
 	activeRigs[plr] = rig
 end
 
-local function matchesChatUsers(plr, chatUsers)
-	if not plr or isSkippedName(plr.Name) or isSkippedName(plr.DisplayName) then
-		return false
-	end
 
-	for _, entry in ipairs(chatUsers) do
-		if type(entry) == "table" then
-			local u = entry.user
-			local d = entry.displayName
 
-			if isSkippedName(u) or isSkippedName(d) then
-				-- explicitly skipped name
-			elseif (type(u) == "string" and string.lower(u) == string.lower(plr.Name))
-				or (type(d) == "string" and string.lower(d) == string.lower(plr.DisplayName)) then
-				return true
-			end
-		end
-	end
-
-	return false
-end
 
 local function syncWelds()
-	if not running then return end
-	local chatUsers = getChatUsers()
-	local desiredPlayers = {}
+    if not running then return end
 
-	for _, plr in ipairs(Players:GetPlayers()) do
-		if matchesChatUsers(plr, chatUsers) then
-			desiredPlayers[plr] = true
-			if not activeRigs[plr] then
-				local root = getRoot(plr.Character)
-				if root then
-					createHollowPurpleRig(plr, root)
-				end
-			end
-		end
-	end
+    local desiredPlayers = {}
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if TARGET_USERS[string.lower(plr.Name)] then
+            desiredPlayers[plr] = true
+
+            if not activeRigs[plr] then
+                local root = getRoot(plr.Character)
+
+                if root then
+                    createHollowPurpleRig(plr, root)
+                end
+            end
+        end
+    end
+
+    for plr in pairs(activeRigs) do
+        if not desiredPlayers[plr] or not plr.Parent then
+            destroyRigForPlayer(plr)
+        end
+    end
+end
 
 	-- Remove rigs for players no longer in _G.NothingChatUsers or excluded
 	for plr in pairs(activeRigs) do
