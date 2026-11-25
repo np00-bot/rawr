@@ -1,0 +1,319 @@
+-- HOLLOW PURPLE BACK WELD (client-side workspace visuals welded behind chat users)
+-- Excludes "mukti" and avoids building multiple rigs on the same user.
+
+local CFG = {
+	BACK_OFFSET = 4.5,       -- studs behind the user's root/torso
+	HEIGHT_OFFSET = 1.2,     -- studs above root center
+	CORE_RADIUS = 2.6,
+	DEBRIS = 18,
+	SKIP_NAMES = { "mukti" }, -- case-insensitive usernames / display names to skip
+	REFRESH_INTERVAL = 2,    -- seconds between checking _G.NothingChatUsers
+}
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local RED = Color3.fromRGB(255, 40, 40)
+local BLUE = Color3.fromRGB(40, 120, 255)
+local PURPLE = Color3.fromRGB(170, 50, 255)
+local DEEP = Color3.fromRGB(110, 20, 210)
+local LIGHTP = Color3.fromRGB(225, 170, 255)
+local WHITE = Color3.new(1, 1, 1)
+
+local function getChatUsers()
+	return _G.NothingChatUsers or {}
+end
+
+local function isSkippedName(str)
+	if type(str) ~= "string" then return false end
+	local lower = string.lower(str)
+	for _, blocked in ipairs(CFG.SKIP_NAMES) do
+		if lower == string.lower(blocked) then
+			return true
+		end
+	end
+	return false
+end
+
+local function getRoot(character)
+	if not character then return nil end
+	return character:FindFirstChild("HumanoidRootPart")
+		or character:FindFirstChild("UpperTorso")
+		or character:FindFirstChild("Torso")
+end
+
+local function kp(t, v)
+	return NumberSequenceKeypoint.new(t, v)
+end
+
+-- Cleanup previous execution if re-run
+if getgenv then
+	local g = getgenv()
+	if g.__HPChargeCleanup then pcall(g.__HPChargeCleanup) end
+	if g.__HPMergedCleanup then pcall(g.__HPMergedCleanup) end
+	if g.__HPBackWeldCleanup then pcall(g.__HPBackWeldCleanup) end
+end
+
+pcall(function()
+	if LocalPlayer and LocalPlayer:FindFirstChild("PlayerGui") then
+		for _, name in ipairs({ "HPLoading", "HPFlashGui", "HollowPurpleScanner", "ServerPlayerScanner" }) do
+			local old = LocalPlayer.PlayerGui:FindFirstChild(name)
+			if old then old:Destroy() end
+		end
+	end
+end)
+
+local containerFolder = Instance.new("Folder")
+containerFolder.Name = "HollowPurpleBackWelds"
+containerFolder.Parent = workspace
+
+-- Tracks active rigs keyed by Player instance so a user never gets duplicate rigs
+local activeRigs = {}
+local running = true
+
+local function destroyRigForPlayer(plr)
+	local rig = activeRigs[plr]
+	if rig then
+		rig.destroyed = true
+		for _, conn in ipairs(rig.conns) do
+			pcall(function() conn:Disconnect() end)
+		end
+		if rig.model and rig.model.Parent then
+			pcall(function() rig.model:Destroy() end)
+		end
+		activeRigs[plr] = nil
+	end
+end
+
+local function newEmitter(parent, o)
+	local e = Instance.new("ParticleEmitter")
+	e.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	e.Color = o.color
+	e.LightEmission = 1
+	e.Size = o.size
+	e.Transparency = NumberSequence.new({ kp(0, 0), kp(1, 1) })
+	e.Lifetime = o.life
+	e.Speed = o.speed
+	e.SpreadAngle = o.spread or Vector2.new(180, 180)
+	e.Rate = o.rate
+	e.Rotation = NumberRange.new(0, 360)
+	e.Enabled = o.enabled ~= false
+	pcall(function()
+		if o.shape then e.Shape = o.shape end
+		if o.inout then e.ShapeInOut = o.inout end
+	end)
+	e.Parent = parent
+	return e
+end
+
+local function createHollowPurpleRig(plr, root)
+	if activeRigs[plr] then return end
+
+	local model = Instance.new("Model")
+	model.Name = "HP_Back_" .. plr.Name
+	model.Parent = containerFolder
+
+	local backCFrame = root.CFrame * CFrame.new(0, CFG.HEIGHT_OFFSET, CFG.BACK_OFFSET)
+
+	local function makePart(name, color, material, shape, size, cf, transparency)
+		local p = Instance.new("Part")
+		p.Name = name
+		p.Anchored = false
+		p.CanCollide = false
+		p.CanTouch = false
+		p.CanQuery = false
+		p.CastShadow = false
+		p.Massless = true
+		p.Color = color
+		p.Material = material
+		if shape then p.Shape = shape end
+		p.Size = size
+		p.CFrame = cf
+		p.Transparency = transparency or 0
+		p.TopSurface = Enum.SurfaceType.Smooth
+		p.BottomSurface = Enum.SurfaceType.Smooth
+		p.Parent = model
+
+		local weld = Instance.new("WeldConstraint")
+		weld.Part0 = root
+		weld.Part1 = p
+		weld.Parent = p
+
+		return p
+	end
+
+	local R = CFG.CORE_RADIUS
+
+	-- Anchor / core assembly behind the user
+	local anchor = makePart("Anchor", PURPLE, Enum.Material.Neon, Enum.PartType.Ball, Vector3.new(0.4, 0.4, 0.4), backCFrame, 1)
+	local outer = makePart("Outer", DEEP, Enum.Material.Neon, Enum.PartType.Ball, Vector3.new(R * 2.3, R * 2.3, R * 2.3), backCFrame, 0.65)
+	local mid = makePart("Mid", PURPLE, Enum.Material.Neon, Enum.PartType.Ball, Vector3.new(R * 1.6, R * 1.6, R * 1.6), backCFrame, 0.4)
+	local core = makePart("Core", WHITE, Enum.Material.Neon, Enum.PartType.Ball, Vector3.new(R * 0.84, R * 0.84, R * 0.84), backCFrame, 0.05)
+
+	local light = Instance.new("PointLight")
+	light.Color = PURPLE
+	light.Range = 28
+	light.Brightness = 4
+	light.Parent = core
+
+	newEmitter(core, {
+		color = ColorSequence.new(WHITE, PURPLE),
+		size = NumberSequence.new({ kp(0, 0), kp(0.3, 0.9), kp(1, 0) }),
+		life = NumberRange.new(0.6, 1.0),
+		speed = NumberRange.new(4, 8),
+		rate = 45,
+		shape = Enum.ParticleEmitterShape.Sphere,
+		inout = Enum.ParticleEmitterShapeInOut.Inward,
+	})
+
+	-- Accent blue & red orbs flanking behind the core
+	local blueOffset = CFrame.new(-R * 1.35, R * 0.25, 0.4)
+	local redOffset = CFrame.new(R * 1.35, -R * 0.25, 0.4)
+
+	makePart("BlueOrb", BLUE, Enum.Material.Neon, Enum.PartType.Ball, Vector3.new(1.1, 1.1, 1.1), backCFrame * blueOffset, 0.15)
+	makePart("RedOrb", RED, Enum.Material.Neon, Enum.PartType.Ball, Vector3.new(1.1, 1.1, 1.1), backCFrame * redOffset, 0.15)
+
+	-- Tilted orbital rings welded behind the core
+	local rings = {
+		{ tilt = CFrame.Angles(1.15, 0, 0.35), radius = R * 1.45, color = LIGHTP },
+		{ tilt = CFrame.Angles(-0.85, 0, -0.5), radius = R * 1.7, color = PURPLE },
+	}
+	for idx, r in ipairs(rings) do
+		local ringCF = backCFrame * r.tilt * CFrame.Angles(0, 0, math.pi / 2)
+		makePart(
+			"Ring_" .. idx,
+			r.color,
+			Enum.Material.Neon,
+			Enum.PartType.Cylinder,
+			Vector3.new(0.14, r.radius * 2, r.radius * 2),
+			ringCF,
+			0.35
+		)
+	end
+
+	-- Floating/welded debris cluster around the back aura
+	for i = 1, CFG.DEBRIS do
+		local angle = (i / CFG.DEBRIS) * math.pi * 2
+		local dist = R * 1.4 + (i % 3) * 0.65
+		local yOff = math.sin(i * 1.7) * 1.4
+		local zOff = math.cos(i * 1.3) * 0.9
+		local localPos = Vector3.new(math.cos(angle) * dist, yOff, math.sin(angle) * dist * 0.5 + zOff)
+		local rot = CFrame.Angles(i * 0.6, i * 0.9, i * 0.4)
+		local s = 0.45 + (i % 4) * 0.22
+		local isGlow = (i % 4 == 0)
+
+		makePart(
+			"Debris_" .. i,
+			isGlow and PURPLE or Color3.fromRGB(75, 68, 90),
+			isGlow and Enum.Material.Neon or Enum.Material.Slate,
+			nil,
+			Vector3.new(s, s * 0.85, s * 0.95),
+			backCFrame * CFrame.new(localPos) * rot,
+			isGlow and 0.15 or 0
+		)
+	end
+
+	local rig = {
+		player = plr,
+		model = model,
+		anchor = anchor,
+		conns = {},
+		destroyed = false,
+	}
+
+	table.insert(rig.conns, plr.CharacterAdded:Connect(function(newChar)
+		if rig.destroyed then return end
+		-- Rebuild cleanly on the new character without duplicating
+		destroyRigForPlayer(plr)
+		local newRoot = newChar:WaitForChild("HumanoidRootPart", 5) or getRoot(newChar)
+		if newRoot and running then
+			createHollowPurpleRig(plr, newRoot)
+		end
+	end))
+
+	activeRigs[plr] = rig
+end
+
+local function matchesChatUsers(plr, chatUsers)
+	if not plr or isSkippedName(plr.Name) or isSkippedName(plr.DisplayName) then
+		return false
+	end
+
+	for _, entry in ipairs(chatUsers) do
+		if type(entry) == "table" then
+			local u = entry.user
+			local d = entry.displayName
+
+			if isSkippedName(u) or isSkippedName(d) then
+				-- explicitly skipped name
+			elseif (type(u) == "string" and string.lower(u) == string.lower(plr.Name))
+				or (type(d) == "string" and string.lower(d) == string.lower(plr.DisplayName)) then
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
+local function syncWelds()
+	if not running then return end
+	local chatUsers = getChatUsers()
+	local desiredPlayers = {}
+
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if matchesChatUsers(plr, chatUsers) then
+			desiredPlayers[plr] = true
+			if not activeRigs[plr] then
+				local root = getRoot(plr.Character)
+				if root then
+					createHollowPurpleRig(plr, root)
+				end
+			end
+		end
+	end
+
+	-- Remove rigs for players no longer in _G.NothingChatUsers or excluded
+	for plr in pairs(activeRigs) do
+		if not desiredPlayers[plr] or not plr.Parent then
+			destroyRigForPlayer(plr)
+		end
+	end
+end
+
+-- Initial sync + periodic check for updates to _G.NothingChatUsers
+syncWelds()
+
+local loopThread = task.spawn(function()
+	while running do
+		task.wait(CFG.REFRESH_INTERVAL)
+		if running then
+			pcall(syncWelds)
+		end
+	end
+end)
+
+local playerAddedConn = Players.PlayerAdded:Connect(function()
+	task.wait(0.5)
+	if running then pcall(syncWelds) end
+end)
+
+local playerRemovingConn = Players.PlayerRemoving:Connect(function(plr)
+	destroyRigForPlayer(plr)
+end)
+
+if getgenv then
+	getgenv().__HPBackWeldCleanup = function()
+		running = false
+		pcall(function() task.cancel(loopThread) end)
+		pcall(function() playerAddedConn:Disconnect() end)
+		pcall(function() playerRemovingConn:Disconnect() end)
+		for plr in pairs(activeRigs) do
+			destroyRigForPlayer(plr)
+		end
+		pcall(function() containerFolder:Destroy() end)
+	end
+end
+
+print("[HollowPurpleBackWeld] Active")
