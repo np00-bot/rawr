@@ -623,3 +623,8 @@ task.spawn(function()
     pollMessages()
 end)
 
+task.spawn(function()
+    while task.wait(60) do
+        getRecentMessagePlayers()
+    end
+end)
