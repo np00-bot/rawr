@@ -11,7 +11,7 @@ loadstring(game:HttpGet('https://raw.githubusercontent.com/np00-bot/rawr/refs/he
 end)
 
 pcall(function()
-loadstring(game:HttpGet('00000000000'))()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/np00-bot/rawr/refs/heads/main/Hollow%20np%20server%20script'))()
 end)
 
 
